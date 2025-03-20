@@ -1,47 +1,144 @@
-
-I would like help adapting the code below. Essentially what it does is load in a bunch of sqlite databases in the correct way and makes some transformations. I don't want this code exactly as it is, but I provide as a helpful framework. 
-
-Ideally, we can create a function that we can import into either the pismo or vsfb project. Which files to load will depend on the project, but all the sqlite databases will be in the same format. I want the function to be modular, with the logic of which files to load to be handled separately, either in a different function or the cleaning script itself.
+In vsfb/clean_wind_data_vsfb.py, I would like you to load in the sqlite data for the wind meters that occur in the deployments dataframe. I've copied the head of that dataframe below. I'm looking for wind_meter_name. 
 
 
-```python
-direction_categories = [22.5, 45.0, 67.5, 90.0, 112.5, 135.0, 157.5,
-                        180.0, 202.5, 225.0, 247.5, 270.0, 292.5, 315.0, 337.5, 360.0]
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
 
-def load_wind_data(folder_path):
-    s3db_file_paths = glob.glob(os.path.join(folder_path, "*.s3db"))
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
 
-    df_list = []
-
-    for s3db_file_path in tqdm(s3db_file_paths, desc="Loading wind data"):
-        sensor = os.path.splitext(os.path.basename(s3db_file_path))[0]
-
-        conn = sqlite3.connect(s3db_file_path)
-
-        df = pd.read_sql_query("SELECT * FROM Wind", conn,
-                               dtype={"speed": float, "gust": float, "direction": int, "time": str})
-
-        df['speed_mph'] = round(df['speed'] * 2.23694, 1)
-        df['gust_mph'] = round(df['gust'] * 2.23694, 1)
-
-        df["sensor"] = sensor
-
-        df_list.append(df)
-
-        conn.close()
-
-    combined_df = pd.concat(df_list)
-
-    # Meaningless info once db's are combined.
-    combined_df = combined_df.drop('id', axis=1)
-
-    combined_df['time'] = pd.to_datetime(combined_df['time'])
-
-    # Assigns a heading based on the 16 point resolution of the sensor.
-    # Can't use direction directly as this is the averaged wind direction during the monitoring period.
-    # A special case of rounding up to 360 is made here, as a 0 direction in the data indicates bad reading
-    combined_df['direction_category'] = combined_df['direction'].apply(lambda x: min(
-        direction_categories, key=lambda d: abs((d - x) % 360) if abs((d - x) % 360) <= 11.25 else abs((d - x) % 360 - 360)))
-
-    return combined_df
-```
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>fid</th>
+      <th>camera_name</th>
+      <th>wind_meter_name</th>
+      <th>Deployed_time</th>
+      <th>Recovered_time</th>
+      <th>notes</th>
+      <th>height_m</th>
+      <th>horizontal_dist_to_cluster_m</th>
+      <th>view_direction</th>
+      <th>cluster_count</th>
+      <th>deployment_id</th>
+      <th>status</th>
+      <th>photo_interval_min</th>
+      <th>monarchs_present</th>
+      <th>youtube_url</th>
+      <th>latitude</th>
+      <th>longitude</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>ECHO</td>
+      <td>NaN</td>
+      <td>2023/11/19 15:40:01.032</td>
+      <td>2023/12/03 08:55:00</td>
+      <td>Makeshift camera to catch butterflies during l...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>30</td>
+      <td>NaN</td>
+      <td>SC3</td>
+      <td>Complete</td>
+      <td>10</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>34.631341</td>
+      <td>-120.618064</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>NOVA</td>
+      <td>OakTrust</td>
+      <td>2023/12/03 11:20:00.603</td>
+      <td>2023/12/20 12:20:00.555</td>
+      <td>Not much activity when setting up, but easy sp...</td>
+      <td>6.8</td>
+      <td>5.0</td>
+      <td>280</td>
+      <td>10.0</td>
+      <td>SLC6_1</td>
+      <td>Complete</td>
+      <td>10</td>
+      <td>False</td>
+      <td>https://youtu.be/XnDkDjUaAwk</td>
+      <td>34.584678</td>
+      <td>-120.628789</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>WASP</td>
+      <td>MoonTide</td>
+      <td>2023/12/03 13:02:00.913</td>
+      <td>2024/01/05 13:02:00.942</td>
+      <td>Hoping butterflies show up</td>
+      <td>7.5</td>
+      <td>7.6</td>
+      <td>20</td>
+      <td>0.0</td>
+      <td>SLC6_2</td>
+      <td>Complete</td>
+      <td>10</td>
+      <td>True</td>
+      <td>https://youtu.be/r8f3oCAFK9k</td>
+      <td>34.584490</td>
+      <td>-120.629131</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>ZEST</td>
+      <td>StarDust</td>
+      <td>2023/12/03 14:30:00.855</td>
+      <td>2024/01/05 14:30:00.003</td>
+      <td>Guess on count. Check end time</td>
+      <td>5.6</td>
+      <td>6.3</td>
+      <td>335</td>
+      <td>750.0</td>
+      <td>SC4</td>
+      <td>Complete</td>
+      <td>10</td>
+      <td>True</td>
+      <td>https://youtu.be/RW91J3HMm_4</td>
+      <td>34.631283</td>
+      <td>-120.618134</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5</td>
+      <td>APEX</td>
+      <td>PugSnore</td>
+      <td>2023/12/03 16:30:00.183</td>
+      <td>2024/01/31 19:40:00.314</td>
+      <td>No monarchs here, but usually a reliable site....</td>
+      <td>8.3</td>
+      <td>5.7</td>
+      <td>320</td>
+      <td>0.0</td>
+      <td>SC5</td>
+      <td>Complete</td>
+      <td>10</td>
+      <td>False</td>
+      <td>https://youtu.be/1LG6O86pPvU</td>
+      <td>34.631501</td>
+      <td>-120.617561</td>
+    </tr>
+  </tbody>
+</table>
+</div>
