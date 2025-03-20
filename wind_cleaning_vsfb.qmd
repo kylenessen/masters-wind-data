@@ -1,0 +1,16 @@
+---
+title: "Wind Data Cleaning VSFB"
+author: "Kyle Nessen"
+date: "2025-03-19"
+format:
+    html:
+        theme: cosmo
+        code-fold: true
+        toc: true
+        toc-depth: 3
+        number-sections: true
+execute:
+    echo: true
+    warning: false
+    message: false
+---
