@@ -83,30 +83,14 @@ print("\nWind data records per deployment:")
 print(deployment_summary)
 
 # %%
-# Add additional deployment information to wind data
-# Get relevant columns from deployments
-deployment_info = deployments[[
-    'deployment_id', 'camera_name', 'height_m', 'horizontal_dist_to_cluster_m', 
-    'view_direction', 'cluster_count', 'latitude', 'longitude'
-]]
-
 # Save processed wind data to CSV
 # Filter to include only wind data with assigned deployment_id
 wind_data_with_deployments = wind_data[wind_data['deployment_id'].notna()].copy()
 
-# Join with deployment information
-wind_data_with_deployments = wind_data_with_deployments.merge(
-    deployment_info, 
-    on='deployment_id',
-    how='left'
-)
-
 # Select and order columns for output
 columns_to_save = [
     # Deployment information
-    'deployment_id', 'camera_name', 'wind_meter_name', 
-    'height_m', 'horizontal_dist_to_cluster_m', 'view_direction', 'cluster_count',
-    'latitude', 'longitude',
+    'deployment_id', 'wind_meter_name',
     # Wind data
     'time', 'speed', 'gust', 'direction', 'speed_mph', 'gust_mph', 'direction_category'
 ]
@@ -117,23 +101,5 @@ output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'vsfb_win
 wind_data_with_deployments.to_csv(output_path, index=False)
 print(f"Saved processed wind data to {output_path}")
 print(f"Saved {len(wind_data_with_deployments)} records across {wind_data_with_deployments['deployment_id'].nunique()} deployments")
-
-# Also save a deployment summary with date ranges and record counts
-deployment_summary = wind_data_with_deployments.groupby('deployment_id').agg(
-    camera_name=('camera_name', 'first'),
-    wind_meter_name=('wind_meter_name', 'first'),
-    record_count=('time', 'count'),
-    start_time=('time', 'min'),
-    end_time=('time', 'max'),
-    latitude=('latitude', 'first'),
-    longitude=('longitude', 'first')
-).reset_index()
-
-# Save summary to CSV
-summary_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'vsfb_wind_data_summary.csv')
-deployment_summary.to_csv(summary_path, index=False)
-print(f"Saved deployment summary to {summary_path}")
-
-# %%
 
 # %%
