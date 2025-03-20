@@ -19,25 +19,25 @@ Your job is to help produce a **single cleaned CSV** per project while keeping t
 ## Technical Overview
 
 1. **Primary Languages**:  
-   - **R** (using `tidyverse`) for data wrangling.  
+   - **Python** (using `pandas`) for data wrangling.  
    - **Quarto** (`.qmd` files) for the main narrative documents.
 
 2. **Data Folders**:
    - `/raw_data` holds all wind files prior to any modifications.
    - `pismo/` and `vsfb/` will contain project-specific outputs and possibly project-specific scripts.
-   - `scripts/` holds **modular R scripts** with function definitions you can source.
+   - `scripts/` holds **modular Python scripts** with function definitions you can import.
 
 3. **Cleaning Workflow**:
    - Each project has (or will have) a **Quarto** document:  
      - `wind_cleaning_pismo.qmd`  
      - `wind_cleaning_vsfb.qmd`
-   - These `.qmd` files **source** R scripts from `scripts/` to keep inline code minimal.
+   - These `.qmd` files **import** Python modules from `scripts/` to keep inline code minimal.
    - Each `.qmd` runs from top to bottom, reading from `/raw_data`, performing cleaning, then writing out a final CSV.
 
 4. **AI-Editable Code**:
-   - Keep each `.R` file **under ~500 lines** to ensure the user can easily share code blocks with you in future prompts.
-   - Within these `.R` files, use clear function names and docstrings (e.g., `#'` comments) so it’s easy to see each function’s purpose.
-   - If you need to split logic into multiple scripts (e.g., `functions_pismo.R`, `functions_vsfb.R`, `utils.R`), do so to maintain readability.
+   - Keep each `.py` file **under ~500 lines** to ensure the user can easily share code blocks with you in future prompts.
+   - Within these `.py` files, use clear function names and docstrings (using Python's standard triple quotes) so it's easy to see each function's purpose.
+   - If you need to split logic into multiple modules (e.g., `functions_pismo.py`, `functions_vsfb.py`, `utils.py`), do so to maintain readability.
 
 ---
 
@@ -45,12 +45,12 @@ Your job is to help produce a **single cleaned CSV** per project while keeping t
 
 1. **Avoid Over-Verbose Code in Quarto**:  
    - The user will supply narrative around the data-wrangling steps.  
-   - You should place **most R logic in separate files** under `scripts/`.
+   - You should place **most Python logic in separate files** under `scripts/`.
    - In Quarto documents, limit yourself to brief code chunks that call the helper functions.
 
 2. **Respect File Boundaries**:  
    - Do not place multi-hundred-line functions in a single script.  
-   - When asked to modify or add a function, create or update the relevant `.R` file in the `scripts/` folder.
+   - When asked to modify or add a function, create or update the relevant `.py` file in the `scripts/` folder.
 
 3. **Time Zone / DST Handling**:  
    - Be prepared to shift timestamps or adjust for daylight savings.  
@@ -64,9 +64,9 @@ Your job is to help produce a **single cleaned CSV** per project while keeping t
    - The user may integrate a QGIS metadata table to identify which raw files belong to each project.  
    - Keep Pismo logic independent of Camera Study logic, unless the user explicitly wants a shared function.
 
-6. **Minimal Commentary**:
+6. **Minimal Commentary**:  
    - The user typically wants to control the narrative in the Quarto files.  
-   - Provide concise in-line comments within R scripts only to clarify function behavior or parameters.
+   - Provide concise in-line comments within Python scripts only to clarify function behavior or parameters.
 
 ---
 
@@ -88,10 +88,10 @@ Your job is to help produce a **single cleaned CSV** per project while keeping t
 
 ## Final Note
 
-Remember, **you** (the LLM) should read and adhere to this file’s guidelines before any new session or significant code generation. This ensures:
+Remember, **you** (the LLM) should read and adhere to this file's guidelines before any new session or significant code generation. This ensures:
 
 1. The Quarto docs remain short and user-friendly.  
-2. The R scripts in `scripts/` remain modular, AI-editable, and version-controlled.  
+2. The Python scripts in `scripts/` remain modular, AI-editable, and version-controlled.  
 3. We produce two final CSV datasets, one for each project, following best practices in data cleaning.
 
 Thank you for your cooperation—happy coding!
